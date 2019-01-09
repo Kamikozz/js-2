@@ -92,7 +92,11 @@ Order.prototype.showOrder = function () {
 	if (this.items.length) {
 		console.log('Order:');
 		this.items.map(function (item) {
-			console.log('* ' + item.name);
+			if (item.size !== undefined)
+				console.log('* ' + item.size + ' ' + item.name + ' (' + item.price + ' ₮,' + item.calories + ' cl.)');
+			else
+				console.log('* ' + item.name + ' (' + item.price + ' ₮,' + item.calories + ' cl.)');
+
 		});
 	}
 	else {
@@ -105,7 +109,11 @@ Order.prototype.showOrder = function () {
  * @param item
  */
 Order.prototype.addItem = function (item) {
-	this.items.push(item);
+	if (this.isPaid) {
+		console.log('[Error]: Can not add items to a closed order!');
+	}
+	else
+		this.items.push(item);
 	return this;
 };
 
@@ -116,7 +124,7 @@ Order.prototype.addItem = function (item) {
 Order.prototype.deleteItem = function (item) {
 	var idx = this.items.indexOf(item);
 	if (idx === -1) {
-		console.log('There is no presented item or your order is empty!');
+		console.log('[Error]: There is no presented item or your order is empty!');
 	}
 	else {
 		this.items.splice(idx, 1);
@@ -138,10 +146,11 @@ Order.prototype.payOrder = function () {
  * @returns {number} Total order price
  */
 Order.prototype.calculateOrderPrice = function () {
-	this.totalPrice = 0;
+	var price = 0;
 	this.items.map(function (item) {
-		this.totalPrice += item.price;
+		price += item.price;
 	});
+	this.totalPrice = price;
 	return this.totalPrice;
 };
 
@@ -150,16 +159,17 @@ Order.prototype.calculateOrderPrice = function () {
  * @returns {number} Total order calories
  */
 Order.prototype.calculateOrderCalories = function () {
-	this.totalCalories = 0;
+	var calories = 0;
 	this.items.map(function (item) {
-		this.totalCalories += item.calories;
+		calories += item.calories;
 	});
+	this.totalCalories = calories;
 	return this.totalCalories;
 };
 
 Order.prototype.getBill = function () {
 	if (this.isPaid) {
-		console.log('This order was payed earlier!');
+		console.log('[Error]: This order was payed earlier!');
 	}
 	else {
 		this.showOrder();
@@ -177,7 +187,7 @@ Order.prototype.showOrderInfo = function () {
 		console.log('Status: \'PAYED\'');
 		this.showOrder();
 		console.log('Total price: ' + this.totalPrice + ' tugriks\n' +
-			'The energy value: ' + this.totalCalories + ' calories\n');
+			'Total energy value: ' + this.totalCalories + ' calories\n');
 	}
 	else {
 		console.log('Status: \'NOT PAYED\'');
@@ -277,17 +287,20 @@ Drink.prototype.constructor = Drink;
 var order1 = new Order();
 order1.getBill();
 order1.deleteItem(1);
-order1.addItem('cash').addItem('rules');
+order1.addItem({size: 'small', name: 'a', b: 5, price: 100, calories: 20});
 order1.getBill();
-order1.payOrder();
-//order1.addItem('q');
 order1.showOrder();
 order1.getBill();
 order1.showOrderInfo();
-// order1.addItem('q');
-// order1.addItem('q');
-// order1.showOrder();
-// order1.getBill();
-// console.log(Object.isFrozen(order1));
-// order1.isPaid = false;
-// console.log(order1.isPaid);
+order1.getBill();
+// order1.payOrder();
+order1.deleteItem('q');
+order1.showOrder();
+order1.getBill();
+
+var cola = new Drink(Drink.COLA.name);
+console.log(cola);
+order1.addItem(cola);
+order1.getBill();
+
+
